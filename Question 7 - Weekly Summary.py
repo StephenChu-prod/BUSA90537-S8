@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 def replace_number_words(text):
     """
     Helper function that converts numbers to words
@@ -34,16 +35,18 @@ def replace_number_words(text):
     else:
         return 0  # Return the original value if not a recognized number word
 
+
 def fix_date(date):
     """
     Change the date so that it can fit into the range
     """
 
-    if date.month in (11,12) and date.year != 2024:
+    if date.month in (11, 12) and date.year != 2024:
         return date.replace(year=2024)
-    elif date.month in (1,2) and date.year != 2025:
+    elif date.month in (1, 2) and date.year != 2025:
         return date.replace(year=2025)
     return date
+
 
 def clean_data(file):
     """Clean and preprocess the data.
@@ -60,23 +63,27 @@ def clean_data(file):
     end_date = pd.to_datetime('10/02/2025', format='%d/%m/%Y')
 
     # Convert into Datetime Format and Filter Date
-    file['Date'] = pd.to_datetime(file['Date'], format='mixed').apply(fix_date)     # Fix the wrong dates
-    clean_file = file[file['Date'].between(start_date, end_date)]   # Filter the data out of range
+    file['Date'] = pd.to_datetime(file['Date'], format='mixed').apply(fix_date)  # Fix the wrong dates
+    clean_file = file[file['Date'].between(start_date, end_date)]  # Filter the data out of range
     return clean_file
 
-def weekly_summary(df):
-    df = df.sort_values(by=['employee_id', 'date'])
 
+def weekly_summary(df):
+    """
+    function for solving weekly summary
+    """
+    df = df.sort_values(by=['Employee Number', 'Date_x'])
     # Compute the 7-day rolling average per employee
-    df['weekly_avg'] = df.groupby('employee_id')['hours_worked'].transform(
-        lambda x: x.rolling(window=7, min_periods=1).mean())
+    df['weekly_avg'] = df.groupby('Employee Number')['Hours Worked'].transform(
+        lambda x: x.rolling(window=7).mean())
     return df
 
+
 if __name__ == '__main__':
-    employee_worklogs = "employee_worklogs.csv"   # Enter your file name here
+    employee_worklogs = "employee_worklogs.csv"  # Enter your file name here
     employee_performance_review = pd.read_csv("employee_performance_review.csv")
     worklongs_data = pd.read_csv(employee_worklogs)
     data = clean_data(worklongs_data)
     merged_df = pd.merge(data, employee_performance_review, on='Employee Number')
     df = weekly_summary(merged_df)
-    df.to_csv(r"output_CleanData.csv", index=False)
+    df.to_csv(r"output.csv", index=False)
