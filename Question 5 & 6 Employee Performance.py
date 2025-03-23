@@ -7,8 +7,8 @@ def productive_employee(df):
     (3) Count of workday (higher count of workday : higher productivity)
     '''
     df = df.groupby(['Employee Number','Performance Review'])['Hours Worked'].agg(['median','count']).reset_index()
-    # Compute the 7-day rolling average per employee
     df.sort_values(by = ['Performance Review','median','count'], ascending = [False,True,False]).reset_index(drop=True)
+    df['productivity_rank'] = df.index+1
     return df
 
 def total_worked_hours(df):
