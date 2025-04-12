@@ -19,25 +19,26 @@ import csv
 import unittest
 
 class DataSet(ABC):
+    """
+    The abstract class that define the function that will be used in the child class
+    """
     @abstractmethod
-    def read_csv_file(self, file):
+    def __init__(self, source):
         """
-        The function that read the contain from CSV file
-
-        Input: The file path -> string
-        Output: The contains of CSV file -> dataframe
+        The constructor of DataSet class
         """
-        with open(file, 'r') as csvfile:
-            # Use the csv module to read the file
-            reader = csv.reader(csvfile)
-            # Read the records into a list
-            records = list(reader)
-            # Create a DataFrame from the records
-            data = pd.DataFrame(records[1:], columns=records[0])
-        return data
+        if isinstance(source, str):
+            self.data = pd.read_csv(source)
+        elif isinstance(source, pd.DataFrame):
+            self.data = source.copy()
+        else:
+            raise TypeError("Dataset expects a file path or a DataFrame.")
     
     @abstractmethod
-    def clean_data(self, data):
+    def get_dataset(self):
+        """
+        The function that return the employee worklogs dataset
+        """
         pass
 
 
@@ -49,6 +50,12 @@ class Worklogs(DataSet):
         """
         self.data_worklogs = self.read_csv_file(file)
         self.data_worklogs = self.clean_data(self.data_worklogs, start_date, end_date)
+    
+    def get_dataset(self):
+        """
+        The function that return the dataset
+        """
+        return self.data_worklogs
 
     def read_csv_file(self, file):
         with open(file, 'r') as csvfile:
@@ -59,6 +66,15 @@ class Worklogs(DataSet):
             # Create a DataFrame from the records
             data = pd.DataFrame(records[1:], columns=records[0])
         return data
+    
+    def __add__(self, other):
+        """
+        The function that add two dataset together
+        """
+        if isinstance(other, DataSet):
+            return MergeDataSet(pd.merge(self.get_dataset(), other.get_dataset(), on='Employee Number'))
+        else:
+            raise TypeError("Unsupported type for addition to merge datasets")
 
     def replace_number_words(self, text):
         """
@@ -113,11 +129,11 @@ class Worklogs(DataSet):
             # Convert the start_date to datetime
             start_date = pd.to_datetime(start_date, format="mixed", errors="coerce")
         else:
-            start_date = data_worklogs["Date"].min()
+            start_date = pd.to_datetime(data_worklogs["Date"].min(), format="mixed", errors="coerce")
             print("You did not specify the start date to filter csv file, some dates may be out of range!!!")
 
         if end_date is None:
-            end_date = data_worklogs["Date"].max()  
+            end_date = pd.to_datetime(data_worklogs["Date"].max(), format="mixed", errors="coerce")  
             print("You did not specify the end date to filter csv file, some dates may be out of range!!!")
         else:
             # Convert the end_date to datetime
@@ -158,6 +174,12 @@ class PerformanceReview(DataSet):
     def __init__(self, file):
         self.data_performance_review = self.read_csv_file(file)
 
+    def get_dataset(self):
+        """
+        The function that return the PerformanceReview dataset
+        """
+        return self.data_performance_review
+
     def read_csv_file(self, file):
         with open(file, 'r') as csvfile:
             # Use the csv module to read the file
@@ -171,13 +193,38 @@ class PerformanceReview(DataSet):
     def clean_data(self):
         pass
 
+class MergeDataSet(DataSet):
+        """
+        The class that is the object of merged dataset of two datasets
+        """
+        def __init__(self, merged_dataset):
+            self.merged_dataset = merged_dataset
+        
+        def get_dataset(self):
+            """
+            The function that return the merged dataset
+            """
+            return self.merged_dataset
+        
+
+class AnalyzeDataSet(DataSet):
+    """
+    The class that is the object of analyzed dataset
+    """
+    def __init__(self, dataset):
+        self.dataset = dataset
+        
+    
+
 
 if __name__ == '__main__':
     file_worklogs = "/Users/chustephen/E/MBusA/Module2/CodingforBusinessProblems/GitHub/BUSA90537-S8/employee_worklogs.csv"
     file_performance_review = "/Users/chustephen/E/MBusA/Module2/CodingforBusinessProblems/GitHub/BUSA90537-S8/employee_performance_review.csv"
-    worklogs = Worklogs(file_worklogs, start_date="2024-11-04", end_date="2025-02-10")
+    worklogs = Worklogs(file_worklogs, start_date="04/11/2024", end_date="10/02/2025")
     performance_review = PerformanceReview(file_performance_review)
-    worklogs.data_worklogs.to_csv('data_clean_1.csv', index=False)
+    # worklogs.data_worklogs.to_csv('data_clean_3.csv', index=False)
+    merge_dataset = worklogs + performance_review
+    merge_dataset.get_dataset().to_csv('employee_report.csv', index=False)
               
         
 

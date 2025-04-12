@@ -57,7 +57,7 @@ def weekly_summary(df):
 
 
 if __name__ == '__main__':
-    employee_worklogs = pd.read_csv("sample.csv")  # Enter your file name here
+    employee_worklogs = pd.read_csv("Question 7/sample.csv")  # Enter your file name here
     df = add_date_column(employee_worklogs)
     df = weekly_summary(df)
     print(df.head())
