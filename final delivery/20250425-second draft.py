@@ -272,6 +272,8 @@ class EmployeeAnalyser:
         grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
         grouped.columns = ['Year_week', 'Employee', 'Overtime']
         grouped['Overtime'] = grouped['Overtime'].round(2)
+
+        # Show the plot
         
         # Export to CSV
         grouped.to_csv('total_overtime_weekly.csv')
