@@ -248,6 +248,11 @@ class EmployeeAnalyser:
             index_col = 'Employee'
             else:
             raise ValueError("Invalid frequency. Choose 'weekly' or 'monthly'.")
+       
+            # output
+            grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
+            
+        
             
             
 
