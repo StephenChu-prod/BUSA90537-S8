@@ -325,6 +325,7 @@ class EmployeeAnalyser:
         Input: String
         Output: Integer
         """
+        
         # Create a new column for overtime hours
         dataset = self.data.copy()
         dataset['Overtime'] = dataset['Hours Worked'] - 7.5
@@ -363,14 +364,14 @@ class EmployeeAnalyser:
         df.to_csv('productivity_analysis.csv', index=False)
 
     def add_2(self):
-        df = self.data.copy()
-        df["IsWeekend"] = df["Weekday"] >= 5
+        data = self.data.copy()
+        data["IsWeekend"] = data["Weekday"] >= 5
         # Aggregate by employee & (year, week)
         agg = (
-            df.groupby(["Employee","Year_week"])
+            data.groupby(["Employee","Year_week"])
             .agg(
-                Weekday_Hours=("Hours Worked", lambda s: s[~df.loc[s.index, "IsWeekend"]].sum()),
-                Weekend_Hours=("Hours Worked", lambda s: s[df.loc[s.index, "IsWeekend"]].sum()),
+                Weekday_Hours=("Hours Worked", lambda s: s[~data.loc[s.index, "IsWeekend"]].sum()),
+                Weekend_Hours=("Hours Worked", lambda s: s[data.loc[s.index, "IsWeekend"]].sum()),
             ))
 
         # Required weekday hours are 7.5h × 5days = 37.5h for every full work‑week

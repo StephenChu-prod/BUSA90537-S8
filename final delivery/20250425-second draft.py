@@ -221,41 +221,45 @@ class EmployeeAnalyser:
         self.data['Year_month'] = self.data['Date_x'].dt.strftime('%Y-%m')
 
     def summary(self, frequency: Literal['weekly', 'monthly', 'weekday', 'total'] = 'weekly', pivot: bool = False):
-        """
-        Generate a summary based on the specified frequency and pivot option.
+            """
+            Generate a summary based on the specified frequency and pivot option.
 
-        Parameters:
-        - frequency (Literal['weekly', 'monthly', 'weekday']): The time frequency for grouping data.
-            Options are 'weekly', 'monthly','weekday'. Default is 'weekly'.
-        - pivot (bool): Whether to pivot the resulting DataFrame. Default is False.
-
-        Returns:
-        - Summary data grouped by the specified frequency.
-        """
-        if frequency == 'weekly':
+            Parameters:
+            - frequency (Literal['weekly', 'monthly', 'weekday']): The time frequency for grouping data.
+                Options are 'weekly', 'monthly','weekday'. Default is 'weekly'.
+            - pivot (bool): Whether to pivot the resulting DataFrame. Default is False.
+            
+            Returns:
+            - Summary data grouped by the specified frequency.
+            """
+            if frequency == 'weekly':
             grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['mean', 'median', 'min', 'max']).reset_index()
             # print(grouped.head())
             # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
             index_col = 'Year_week'
-        elif frequency == 'monthly':
+            elif frequency == 'monthly':
             grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
             index_col = 'Year_month'
-        elif frequency == 'weekday':
+            elif frequency == 'weekday':
             grouped = self.data.groupby(['Weekday', 'Employee'])['Hours Worked'].sum().reset_index()
             index_col = 'Weekday'
-        elif frequency == 'total':
+            elif frequency == 'total':
             grouped = self.data.groupby(['Employee'])['Hours Worked'].sum().reset_index()
             index_col = 'Employee'
-        else:
+            else:
             raise ValueError("Invalid frequency. Choose 'weekly' or 'monthly'.")
+       
+            # output
+            grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
+            if pivot:
+                pivoted = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
+                pivoted.to_csv(f'pivoted_summary_{frequency}.csv')
+        
+            
+            
 
-        # output
-        grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
-        if pivot:
-            pivoted = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
-            pivoted.to_csv(f'pivoted_summary_{frequency}.csv')
-        else:
-            grouped.to_csv(f'grouped_summary_{frequency}.csv', index=False)
+
+
 
     @staticmethod
     def __get_overtime(hours):
@@ -276,8 +280,36 @@ class EmployeeAnalyser:
         Input: String
         Output: Integer
         """
+        # Create a new column for overtime hours
+        dataset = self.data.copy()
+        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
+        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
 
-        pass
+        # Group by employee and sum overtime hours
+        grouped = dataset.groupby(['Employee'])['Overtime'].sum().reset_index()
+        grouped.columns = ['Employee', 'Overtime']
+        grouped['Overtime'] = grouped['Overtime'].round(2)
+
+        # Show the plot
+
+        # Export to CSV
+        grouped.to_csv('total_overtime.csv')
+
+    def total_overtime_weekly(self):
+        """
+        Helper function that the calculates total overtime hours worked by employees
+        Input: String
+        Output: Integer
+        """
+        # Create a new column for overtime hours
+        dataset = self.data.copy()
+        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
+        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
+
+        # Group by employee and sum overtime hours
+        grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
+        grouped.columns = ['Year_week', 'Employee', 'Overtime']
+        grouped['Overtime'] = grouped['Overtime'].round(2)
 
     def productivity_analysis(self):
         df = self.data.copy()
