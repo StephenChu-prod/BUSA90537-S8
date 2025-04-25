@@ -232,6 +232,11 @@ class EmployeeAnalyser:
             Returns:
             - Summary data grouped by the specified frequency.
             """
+            if frequency == 'weekly':
+            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['mean', 'median', 'min', 'max']).reset_index()
+            # print(grouped.head())
+            # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
+            index_col = 'Year_week'
             
 
 
