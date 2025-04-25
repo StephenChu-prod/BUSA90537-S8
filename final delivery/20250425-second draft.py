@@ -251,6 +251,8 @@ class EmployeeAnalyser:
        
             # output
             grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
+            if pivot:
+            pivoted = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
             
         
             
