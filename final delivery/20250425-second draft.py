@@ -249,6 +249,11 @@ class EmployeeAnalyser:
         dataset['Overtime'] = dataset['Hours Worked'] - 7.5
         dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
 
+        # Group by employee and sum overtime hours
+        grouped = dataset.groupby(['Employee'])['Overtime'].sum().reset_index()
+        grouped.columns = ['Employee', 'Overtime']
+        grouped['Overtime'] = grouped['Overtime'].round(2)
+
     def total_overtime_weekly(self):
         """
         Helper function that the calculates total overtime hours worked by employees
