@@ -108,7 +108,8 @@ class Worklogs(DataSet):
         Part 4: Check the employee name and employee number
         """
 
-        self.__replace_number_words()
+        self.__replace_words_number()
+
         # 2. Identify and replace invalid value in Date Column
         self._data["Date"] = pd.to_datetime(self._data["Date"], format="mixed", errors="coerce")
 
@@ -118,10 +119,10 @@ class Worklogs(DataSet):
         # 4. Correct the invalid name or null name
         self.__correct_name()
 
-    def __replace_number_words(self):
+    def __replace_words_number(self):
         """
         Note: This is meant to be a private function that should not be called outside the object
-        Helper function that converts numbers to words
+        Helper function that converts words to numbers and filters numbers
         """
 
         def word_to_number(text):
@@ -378,9 +379,9 @@ class TestAnalyser(unittest.TestCase):
         """
         self.assertEqual(expected, input)
 
-    def test_summary(self):
+    def test__total_hours_invalid_string(self):
         """
-        Test the summary method of EmployeeAnalyser class.
+        Test the EmployeeAnalyser class with invalid string in the Hours Worked column.
         """
         
 

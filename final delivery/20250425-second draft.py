@@ -221,41 +221,7 @@ class EmployeeAnalyser:
         self.data['Year_month'] = self.data['Date_x'].dt.strftime('%Y-%m')
 
     def summary(self, frequency: Literal['weekly', 'monthly', 'weekday', 'total'] = 'weekly', pivot: bool = False):
-        """
-        Generate a summary based on the specified frequency and pivot option.
-
-        Parameters:
-        - frequency (Literal['weekly', 'monthly', 'weekday']): The time frequency for grouping data.
-            Options are 'weekly', 'monthly','weekday'. Default is 'weekly'.
-        - pivot (bool): Whether to pivot the resulting DataFrame. Default is False.
-
-        Returns:
-        - Summary data grouped by the specified frequency.
-        """
-        if frequency == 'weekly':
-            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['mean', 'median', 'min', 'max']).reset_index()
-            # print(grouped.head())
-            # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
-            index_col = 'Year_week'
-        elif frequency == 'monthly':
-            grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
-            index_col = 'Year_month'
-        elif frequency == 'weekday':
-            grouped = self.data.groupby(['Weekday', 'Employee'])['Hours Worked'].sum().reset_index()
-            index_col = 'Weekday'
-        elif frequency == 'total':
-            grouped = self.data.groupby(['Employee'])['Hours Worked'].sum().reset_index()
-            index_col = 'Employee'
-        else:
-            raise ValueError("Invalid frequency. Choose 'weekly' or 'monthly'.")
-
-        # output
-        grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
-        if pivot:
-            pivoted = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
-            pivoted.to_csv(f'pivoted_summary_{frequency}.csv')
-        else:
-            grouped.to_csv(f'grouped_summary_{frequency}.csv', index=False)
+        pass
 
     @staticmethod
     def __get_overtime(hours):
