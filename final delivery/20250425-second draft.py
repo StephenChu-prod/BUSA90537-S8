@@ -279,6 +279,14 @@ class EmployeeAnalyser:
 
         pass
 
+    def total_overtime_weekly(self):
+        """
+        Helper function that the calculates total overtime hours worked by employees
+        Input: String
+        Output: Integer
+        """
+        pass
+
     def productivity_analysis(self):
         df = self.data.copy()
 
