@@ -302,7 +302,9 @@ class EmployeeAnalyser:
         df.to_csv('productivity_analysis.csv', index=False)
 
     def add_1(self):
-        pass
+        data = self.data.copy()
+        # calculate quarterly median per employee
+        employee_quarterly = data.groupby(['Quarter', 'Employee'])['Hours Worked'].agg(['median']).reset_index()
 
     def add_2(self):
         pass
