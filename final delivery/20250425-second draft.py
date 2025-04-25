@@ -268,6 +268,11 @@ class EmployeeAnalyser:
         dataset['Overtime'] = dataset['Hours Worked'] - 7.5
         dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
 
+        # Group by employee and sum overtime hours
+        grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
+        grouped.columns = ['Year_week', 'Employee', 'Overtime']
+        grouped['Overtime'] = grouped['Overtime'].round(2)
+
     def productivity_analysis(self):
         df = self.data.copy()
 
