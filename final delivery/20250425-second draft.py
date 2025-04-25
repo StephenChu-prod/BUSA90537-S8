@@ -295,6 +295,9 @@ class EmployeeAnalyser:
         # Save results
         df.to_csv('productivity_analysis.csv', index=False)
 
+    def add_1(self):
+        pass
+
     def add_2(self):
         pass
 
