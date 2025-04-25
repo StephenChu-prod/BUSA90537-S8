@@ -240,6 +240,9 @@ class EmployeeAnalyser:
             elif frequency == 'monthly':
             grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
             index_col = 'Year_month'
+            elif frequency == 'weekday':
+            grouped = self.data.groupby(['Weekday', 'Employee'])['Hours Worked'].sum().reset_index()
+            index_col = 'Weekday'
             
             
 
