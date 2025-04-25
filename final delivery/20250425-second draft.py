@@ -221,7 +221,23 @@ class EmployeeAnalyser:
         self.data['Year_month'] = self.data['Date_x'].dt.strftime('%Y-%m')
 
     def summary(self, frequency: Literal['weekly', 'monthly', 'weekday', 'total'] = 'weekly', pivot: bool = False):
-        pass
+            """
+            Generate a summary based on the specified frequency and pivot option.
+
+            Parameters:
+            - frequency (Literal['weekly', 'monthly', 'weekday']): The time frequency for grouping data.
+                Options are 'weekly', 'monthly','weekday'. Default is 'weekly'.
+            - pivot (bool): Whether to pivot the resulting DataFrame. Default is False.
+            
+            Returns:
+            - Summary data grouped by the specified frequency.
+            """
+            if frequency == 'weekly':
+            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['mean', 'median', 'min', 'max']).reset_index()
+            # print(grouped.head())
+            # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
+            index_col = 'Year_week'
+           
 
     @staticmethod
     def __get_overtime(hours):
@@ -272,11 +288,6 @@ class EmployeeAnalyser:
         grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
         grouped.columns = ['Year_week', 'Employee', 'Overtime']
         grouped['Overtime'] = grouped['Overtime'].round(2)
-
-        # Show the plot
-
-        # Export to CSV
-        grouped.to_csv('total_overtime_weekly.csv')
 
     def productivity_analysis(self):
         df = self.data.copy()
