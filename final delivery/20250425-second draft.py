@@ -337,6 +337,8 @@ class EmployeeAnalyser:
         data = self.data.copy()
         # calculate quarterly median per employee
         employee_quarterly = data.groupby(['Quarter', 'Employee'])['Hours Worked'].agg(['median']).reset_index()
+        # calculate overall 
+        overall_quarterly = data.groupby(['Quarter'])['Hours Worked'].agg(['median']).reset_index().rename(columns={'median': 'overall_median'})
 
     def add_2(self):
         pass
