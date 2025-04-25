@@ -237,6 +237,17 @@ class EmployeeAnalyser:
             # print(grouped.head())
             # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
             index_col = 'Year_week'
+            elif frequency == 'monthly':
+            grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
+            index_col = 'Year_month'
+            elif frequency == 'weekday':
+                grouped = self.data.groupby(['Weekday', 'Employee'])['Hours Worked'].sum().reset_index()
+                index_col = 'Weekday'
+            elif frequency == 'total':
+                grouped = self.data.groupby(['Employee'])['Hours Worked'].sum().reset_index()
+                index_col = 'Employee'
+            else:
+                raise ValueError("Invalid frequency. Choose 'weekly' or 'monthly'.")
             
 
 
