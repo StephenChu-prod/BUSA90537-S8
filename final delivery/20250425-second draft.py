@@ -343,6 +343,11 @@ class EmployeeAnalyser:
         quarterly_performance = pd.merge(employee_quarterly, overall_quarterly, how='left', on='Quarter')
         quarterly_performance['diff'] = quarterly_performance['median'] - quarterly_performance['overall_median']
 
+        # pivot and export result
+        quarterly_pivot = quarterly_performance.pivot(index=['Employee'], columns='Quarter',values='diff').reset_index().round(2)
+        quarterly_pivot.to_csv('quarterly_performance.csv', index=False)
+
+
     def add_2(self):
         pass
 
