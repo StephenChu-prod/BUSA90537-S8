@@ -337,8 +337,11 @@ class EmployeeAnalyser:
         data = self.data.copy()
         # calculate quarterly median per employee
         employee_quarterly = data.groupby(['Quarter', 'Employee'])['Hours Worked'].agg(['median']).reset_index()
-        # calculate overall 
+
+        # calculate overall then calculate the difference
         overall_quarterly = data.groupby(['Quarter'])['Hours Worked'].agg(['median']).reset_index().rename(columns={'median': 'overall_median'})
+        quarterly_performance = pd.merge(employee_quarterly, overall_quarterly, how='left', on='Quarter')
+        quarterly_performance['diff'] = quarterly_performance['median'] - quarterly_performance['overall_median']
 
     def add_2(self):
         pass
