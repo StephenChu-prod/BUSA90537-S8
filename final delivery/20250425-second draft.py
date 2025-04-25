@@ -270,7 +270,13 @@ class EmployeeAnalyser:
         else:
             return 0
 
-    def overtime(self):
+    def total_overtime(self):
+        """
+        Helper function that the calculates total overtime hours worked by employees
+        Input: String
+        Output: Integer
+        """
+
         pass
 
     def productivity_analysis(self):
