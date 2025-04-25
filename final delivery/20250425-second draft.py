@@ -242,8 +242,6 @@ class EmployeeAnalyser:
         Input: String
         Output: Integer
         """
-
-        pass
         # Create a new column for overtime hours
         dataset = self.data.copy()
         dataset['Overtime'] = dataset['Hours Worked'] - 7.5
@@ -254,6 +252,11 @@ class EmployeeAnalyser:
         grouped.columns = ['Employee', 'Overtime']
         grouped['Overtime'] = grouped['Overtime'].round(2)
 
+        # Show the plot
+
+        # Export to CSV
+        grouped.to_csv('total_overtime.csv')
+        
     def total_overtime_weekly(self):
         """
         Helper function that the calculates total overtime hours worked by employees
