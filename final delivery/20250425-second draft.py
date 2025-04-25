@@ -274,7 +274,26 @@ class EmployeeAnalyser:
         pass
 
     def productivity_analysis(self):
-        pass
+        df = self.data.copy()
+
+        # Extract performance score from reviews
+        df['Performance Score'] = df['Performance Review'].str.extract(r'(\d)').astype(int)
+
+        # Group by employee and performance score, calculate median hours and entry count
+        df = df.groupby(['Employee', 'Performance Score'])['Hours Worked'].agg(
+            ['median', 'count']).reset_index()
+
+        # Sort by performance (desc), median hours (asc), count (desc) and reset index
+        df = df.sort_values(
+            by=['Performance Score', 'median', 'count'],
+            ascending=[False, True, False]
+        ).reset_index(drop=True)
+
+        # Assign rank based on sorted order
+        df['productivity_rank'] = df.index + 1
+
+        # Save results
+        df.to_csv('productivity_analysis.csv', index=False)
 
     def add_2(self):
         pass
@@ -327,7 +346,7 @@ if __name__ == '__main__':
     analyser = EmployeeAnalyser(file_worklogs, file_performance_review, start_date=start_date, end_date=end_date)
 
     # Question 1 and 7
-    analyser.summary(frequency='weekly')
+    # analyser.summary(frequency='weekly')
 
     # Question 2 and 8
     # analyser.summary(frequency='monthly', pivot=True)
