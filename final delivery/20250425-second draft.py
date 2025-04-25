@@ -244,6 +244,10 @@ class EmployeeAnalyser:
         """
 
         pass
+        # Create a new column for overtime hours
+        dataset = self.data.copy()
+        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
+        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
 
     def total_overtime_weekly(self):
         """
