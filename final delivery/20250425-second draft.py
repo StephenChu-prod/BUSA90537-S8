@@ -198,9 +198,6 @@ class EmployeeAnalyser:
         self.out_data = self.data.copy()
 
     def output(self):
-        """
-        Output the data to a CSV file
-        """
         if not self.out_data:
             print('there is no output')
         self.out_data.to_csv('analyser.csv', index=False)
@@ -236,9 +233,9 @@ class EmployeeAnalyser:
         - Summary data grouped by the specified frequency.
         """
         if frequency == 'weekly':
-            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['sum']).reset_index()
+            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['mean', 'median', 'min', 'max']).reset_index()
             # print(grouped.head())
-            grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
+            # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
             index_col = 'Year_week'
         elif frequency == 'monthly':
             grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
@@ -260,138 +257,27 @@ class EmployeeAnalyser:
         else:
             grouped.to_csv(f'grouped_summary_{frequency}.csv', index=False)
 
-    # @staticmethod
-    # def __get_overtime(hours):
-    #     """
-    #     Helper function that converts words to numbers and filters numbers
-    #     Input: String
-    #     Output: Integer
-    #     """
-    #     hours = float(hours)
-    #     if hours > 7.5:
-    #         return hours - 7.5
-    #     else:
-    #         return 0
-
-    # def overtime(self):
-
-    #     # take a copy of the merged data
-    #     df = self.data.copy()
-
-    #     # create a new column for the overtime per day
-    #     df['Daily Overtime Each Employee'] = df['Hours Worked'].apply(self.__get_overtime)
-
-    #     # group the data and sum them up
-    #     df['Total_Overtime'] = \
-    #         df.groupby('Employee Number')[['Daily Overtime Each Employee']].transform('sum','median').round(2)
-    #     df['Weekly_overtime'] = df.groupby(['Year_week', 'Employee'])[
-    #         'Daily Overtime Each Employee'].transform('mean').round(2)
-
-    #     # drop any duplicated rows, and unused columns
-    #     overtime_summary = df[['Year_week', 'Employee', 'Weekly_overtime',
-    #                            'Total_Overtime']]
-    #     overtime_summary = overtime_summary.groupby(['Year_week', 'Employee'])[
-    #         ['Weekly_overtime', 'Total_Overtime']
-    #     ].first().reset_index()
-
-    #     # return the output
-    #     overtime_summary.to_csv('overtime_summary.csv', index=False)
-
-    def total_overtime(self):
+    @staticmethod
+    def __get_overtime(hours):
         """
-        Helper function that the calculates total overtime hours worked by employees
+        Helper function that converts words to numbers and filters numbers
         Input: String
         Output: Integer
         """
-        # Create a new column for overtime hours
-        dataset = self.data.copy()
-        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
-        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
+        hours = float(hours)
+        if hours > 7.5:
+            return hours - 7.5
+        else:
+            return 0
 
-        # Group by employee and sum overtime hours
-        grouped = dataset.groupby(['Employee'])['Overtime'].sum().reset_index()
-        grouped.columns = ['Employee', 'Overtime']
-        grouped['Overtime'] = grouped['Overtime'].round(2)
-
-        # Show the plot
-        
-        # Export to CSV
-        grouped.to_csv('total_overtime.csv')
-
-
-    def total_overtime_weekly(self):
-        """
-        Helper function that the calculates total overtime hours worked by employees
-        Input: String
-        Output: Integer
-        """
-        # Create a new column for overtime hours
-        dataset = self.data.copy()
-        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
-        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
-
-        # Group by employee and sum overtime hours
-        grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
-        grouped.columns = ['Year_week', 'Employee', 'Overtime']
-        grouped['Overtime'] = grouped['Overtime'].round(2)
-
-        # Show the plot
-
-        # Export to CSV
-        grouped.to_csv('total_overtime_weekly.csv')
+    def overtime(self):
+        pass
 
     def productivity_analysis(self):
-        df = self.data.copy()
-
-        # Extract performance score from reviews
-        df['Performance Score'] = df['Performance Review'].str.extract(r'(\d)').astype(int)
-
-        # Group by employee and performance score, calculate median hours and entry count
-        df = df.groupby(['Employee', 'Performance Score'])['Hours Worked'].agg(
-            ['median', 'count']).reset_index()
-
-        # Sort by performance (desc), median hours (asc), count (desc) and reset index
-        df = df.sort_values(
-            by=['Performance Score', 'median', 'count'],
-            ascending=[False, True, False]
-        ).reset_index(drop=True)
-
-        # Assign rank based on sorted order
-        df['productivity_rank'] = df.index + 1
-
-        # Save results
-        df.to_csv('productivity_analysis.csv', index=False)
+        pass
 
     def add_2(self):
-        df = self.data.copy()
-        df["IsWeekend"] = df["Weekday"] >= 5
-        # Aggregate by employee & (year, week)
-        agg = (
-            df.groupby(["Employee","Year_week"])
-            .agg(
-                Weekday_Hours=("Hours Worked", lambda s: s[~df.loc[s.index, "IsWeekend"]].sum()),
-                Weekend_Hours=("Hours Worked", lambda s: s[df.loc[s.index, "IsWeekend"]].sum()),
-            ))
-
-        # Required weekday hours are 7.5h × 5days = 37.5h for every full work‑week
-        agg["Required_Weekday_Hours"] = 37.5
-
-        # Shortfall during the week (Difference between required weekday hours and actual weekday hours)
-        agg["Weekday_Deficit"] = agg["Required_Weekday_Hours"] - agg["Weekday_Hours"]
-
-        # Positive value means weekend work fully covers the deficit (or more)
-        agg["Weekend_minus_Deficit"] = agg["Weekend_Hours"] - agg["Weekday_Deficit"]
-
-        # Create a column to show whether the employee use weekend to compensates work hours
-        agg["Weekend_Compensates"] = agg[
-                                         "Weekend_minus_Deficit"] >= 0  # If True means weekend work fully covers the deficit
-
-        # agg = agg[["Weekday_Deficit","Weekend_Hours","Weekend_minus_Deficit"]]
-        agg = agg.round(2)
-        # Reset index for a table
-        result = agg.reset_index()
-
-        result.to_csv('weekday weekend comparison.csv', index=False)
+        pass
 
 
 
