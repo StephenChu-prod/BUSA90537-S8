@@ -243,6 +243,9 @@ class EmployeeAnalyser:
             elif frequency == 'weekday':
             grouped = self.data.groupby(['Weekday', 'Employee'])['Hours Worked'].sum().reset_index()
             index_col = 'Weekday'
+            elif frequency == 'total':
+            grouped = self.data.groupby(['Employee'])['Hours Worked'].sum().reset_index()
+            index_col = 'Employee'
             
             
 
