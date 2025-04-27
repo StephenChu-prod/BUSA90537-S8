@@ -223,18 +223,18 @@ class EmployeeAnalyser:
     def summary(self, frequency: Literal['weekly', 'monthly', 'weekday', 'total'] = 'weekly', pivot: bool = False):
         pass
 
-    @staticmethod
-    def __get_overtime(hours):
-        """
-        Helper function that converts words to numbers and filters numbers
-        Input: String
-        Output: Integer
-        """
-        hours = float(hours)
-        if hours > 7.5:
-            return hours - 7.5
-        else:
-            return 0
+    # @staticmethod
+    # def __get_overtime(hours):
+    #     """
+    #     Helper function that converts words to numbers and filters numbers
+    #     Input: String
+    #     Output: Integer
+    #     """
+    #     hours = float(hours)
+    #     if hours > 7.5:
+    #         return hours - 7.5
+    #     else:
+    #         return 0
 
     def total_overtime(self):
         """
