@@ -20,8 +20,8 @@ import unittest
 from typing import Literal # Reference: https://docs.python.org/3/library/typing.html#typing.Literal
 import matplotlib.pyplot as plt # Reference: https://matplotlib.org/stable/api/pyplot_summary.html
 import re # Reference: https://docs.python.org/3/library/re.html#re.match
-
-
+import numpy as np # Reference: https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray
+ 
 class DataSet(ABC):
     """
     The abstract class that define the function that will be used in the child class
@@ -229,7 +229,9 @@ class EmployeeAnalyser:
 
     def __init__(self, worklogs_file, performance_file, start_date=None, end_date=None):
         """init method"""
-        self.worklogs = Worklogs(worklogs_file, start_date, end_date)
+        self._start_date = self.__parse_date(start_date)
+        self._end_date = self.__parse_date(end_date)
+        self.worklogs = Worklogs(worklogs_file)
         self.reviews = PerformanceReview(performance_file)
 
         # Clean data
@@ -239,12 +241,49 @@ class EmployeeAnalyser:
         # Merge datasets
         self.data = self.worklogs + self.reviews
         self.additional_columns()
-        self.out_data = self.data.copy()
 
-    def output(self):
-        if not self.out_data:
-            print('there is no output')
-        self.out_data.to_csv('analyser.csv', index=False)
+        # backup for original data
+        self.original_data = self.data.copy()
+
+        # filter the data with start and end dates
+        self.set_dates(start_date, end_date)
+
+
+    def set_dates(self, start=None, end=None):
+        self._start_date = self.__parse_date(start)
+        self._end_date = self.__parse_date(end)
+        self.filter_date()
+
+
+    @staticmethod
+    def __parse_date(date_str):
+        """
+        Validate and Parse date string into datetime object.
+        Reference: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
+        """
+        if not date_str:
+            return None
+        try:
+
+            return pd.to_datetime(date_str, dayfirst=True)
+        except ValueError:
+            raise ValueError(f"Invalid date format: {date_str}")
+        
+
+    def filter_date(self):
+        """
+        Filter the data by date range
+        """
+        # Filter the data based on the date range, if the date is out of the range, delete this row
+        if self._start_date and self._end_date:
+            self.data = self.original_data[self.original_data['Date_x'].between(self._start_date, self._end_date)]
+        else:
+            self.data = self.original_data
+
+
+    def export_original_data(self):
+        self.original_data.to_csv("original_data.csv")
+
 
     def additional_columns(self):
         """
@@ -266,7 +305,7 @@ class EmployeeAnalyser:
         self.data['Quarter'] = self.data['Date_x'].dt.to_period('Q')
 
 
-    def summary(self, frequency: Literal['weekly', 'monthly', 'weekday', 'total'] = 'weekly'):
+    def summary(self, frequency: Literal['weekly', 'monthly', 'Weekday', 'total'] = 'weekly'):
         """
         Generate a summary based on the specified frequency.
 
@@ -283,73 +322,58 @@ class EmployeeAnalyser:
             index_col = ['Year_weekly','Employee']
         elif frequency == 'monthly':
             index_col = ['Year_monthly','Employee']
-        elif frequency == 'weekday':
+        elif frequency == 'Weekday':
             index_col = ['Weekday','Employee']
         elif frequency == 'total':
             index_col = ['Employee']
 
         grouped = group_data.groupby(index_col)['Hours Worked'].agg(
             ['mean', 'median', 'min', 'max', 'count'])
+        grouped.columns = ['Avg Hours Worked', 'Median Hours Worked',
+                           'Min Hours Worked', 'Max Hours Worked','Number of Days Worked']
         grouped = grouped.round(2).reset_index()
-        grouped.to_csv(f'grouped_summary_{frequency}.csv', index=False)
+        grouped.to_csv(f'summary_{frequency}.csv', index=False)
 
         return grouped
 
-    # @staticmethod
-    # def __get_overtime(hours):
-    #     """
-    #     Helper function that converts words to numbers and filters numbers
-    #     Input: String
-    #     Output: Integer
-    #     """
-    #     hours = float(hours)
-    #     if hours > 7.5:
-    #         return hours - 7.5
-    #     else:
-    #         return 0
 
-    def total_overtime(self):
+    @staticmethod
+    def __get_overtime(hours):
+        """
+        Helper function that converts words to numbers and filters numbers
+        Input: String
+        Output: Integer
+        """
+        hours = float(hours)
+        if hours > 7.5:
+            return hours - 7.5
+        else:
+            return 0
+
+    def overtime(self,frequency: Literal['weekly','total'] = 'total'):
         """
         Helper function that the calculates total overtime hours worked by employees
         Input: String
         Output: Integer
         """
+        if frequency == 'weekly':
+            index_col = ['Year_weekly', 'Employee']
+        else:
+            index_col = ['Employee']
         # Create a new column for overtime hours
         dataset = self.data.copy()
         dataset['Overtime'] = dataset['Hours Worked'] - 7.5
         dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
 
         # Group by employee and sum overtime hours
-        grouped = dataset.groupby(['Employee'])['Overtime'].sum().reset_index()
-        grouped.columns = ['Employee', 'Overtime']
-        grouped['Overtime'] = grouped['Overtime'].round(2)
+        grouped = dataset.groupby(index_col)['Overtime'].sum()
+        grouped.columns = ['Overtime']
+        grouped = grouped.round(2).reset_index()
 
         # Export to CSV
-        grouped.to_csv('total_overtime.csv')
+        grouped.to_csv(f'overtime_{frequency}.csv',index=False)
 
-        return grouped
-    
-
-    def total_overtime_weekly(self):
-        """
-        Helper function that the calculates total overtime hours worked by employees
-        Input: String
-        Output: Integer
-        """
-        # Create a new column for overtime hours
-        dataset = self.data.copy()
-        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
-        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
-
-        # Group by employee and sum overtime hours
-        grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
-        grouped.columns = ['Year_week', 'Employee', 'Overtime']
-        grouped['Overtime'] = grouped['Overtime'].round(2)
-
-        # Export to CSV
-        grouped.to_csv('total_overtime_weekly.csv')
-
-        return grouped
+        return grouped   
     
 
     def productivity_analysis(self):
@@ -381,12 +405,12 @@ class EmployeeAnalyser:
 
         return data_to_productivity
 
-    def add_1(self):
-        data = self.data.copy()
+    def quarterly_performance(self):
+        data_add1 = self.data.copy()
 
-        employee_quarterly = data.groupby(['Quarter', 'Employee'])['Hours Worked'].agg(
+        employee_quarterly = data_add1.groupby(['Quarter', 'Employee'])['Hours Worked'].agg(
             ['median']).reset_index()
-        overall_quarterly = data.groupby(['Quarter'])['Hours Worked'].agg(['median']).reset_index().rename(
+        overall_quarterly = data_add1.groupby(['Quarter'])['Hours Worked'].agg(['median']).reset_index().rename(
             columns={'median': 'overall_median'})
         quarterly_performance = pd.merge(employee_quarterly, overall_quarterly, how='left', on='Quarter')
         quarterly_performance['diff'] = quarterly_performance['median'] - quarterly_performance['overall_median']
@@ -397,25 +421,25 @@ class EmployeeAnalyser:
         return quarterly_pivot
     
 
-    def add_2(self):
-        df = self.data.copy()
+    def weekend_compensation(self):
+        data_add2 = self.data.copy()
         # create new column
-        df["IsWeekend"] = df["Weekday"] >= 5
+        data_add2["IsWeekend"] = data_add2["Weekday"] >= 5
 
         # Find out the daily deficit for weekday
-        df["Weekday_Deficit"] = df.apply(
+        data_add2["Weekday_Deficit"] = data_add2.apply(
             lambda row: max(0, 7.5 - row["Hours Worked"]) if not row["IsWeekend"] else 0,
             axis=1
         )
 
         # separate the weekday hours from weekend
-        df["Weekend_Hours"] = df.apply(
+        data_add2["Weekend_Hours"] = data_add2.apply(
             lambda row: row["Hours Worked"] if row["IsWeekend"] else 0,
             axis=1
         )
 
         # Group by weekly
-        weekly = df.groupby(["Employee", "Year_week"]).agg(Total_Weekday_Deficit=("Weekday_Deficit", "sum"),
+        weekly = data_add2.groupby(["Employee", "Year_weekly"]).agg(Total_Weekday_Deficit=("Weekday_Deficit", "sum"),
                                                         Total_Weekend_Hours=("Weekend_Hours", "sum"))
 
         # If the weekend compensate the weekday deficit
@@ -433,7 +457,7 @@ class EmployeeAnalyser:
         )
 
         # We would also like to compare with the Performance Score to see if there is relationship
-        employee_score = df[["Employee", "Performance Review"]].drop_duplicates(subset="Employee")
+        employee_score = data_add2[["Employee", "Performance Review"]].drop_duplicates(subset="Employee")
         agg = pd.merge(agg, employee_score, on="Employee", how="left")
 
         agg = agg.round(2)
@@ -510,25 +534,23 @@ class TestAnalyser(unittest.TestCase):
             # Check if the date is a number in range of (0,6), where 0 is Monday and 6 is Sunday
             for value in date_values:
                 self.assertTrue(
-                    pd.api.types.is_integer_dtype(value) and 0 <= value <= 6,
+                    isinstance(value, (int, np.integer)) and 0 <= value <= 6,
                     f"Invalid date format: {date_type} date should be in range of (0,6)."
                 )
 
 
-    def is_valid_number(self, summary, frequency):
+    def is_valid_number(self, summary, colums, frequency):
         """
         Check if selected columns in the summary DataFrame contain valid numbers.
         """
-        numeric_cols = ['mean', 'median', 'min', 'max', 'count']
-
         for col in summary.columns:
-            if col not in numeric_cols:
+            if col not in colums:
                 continue  # Skip non-numeric columns
 
             for val in summary[col]:
                 self.assertIsInstance(
                     val, (int, float),
-                   f"Invalid type: {col}'s value in {frequency} summary should be a number."
+                   f"Invalid type: {frequency}'s value should be a number."
                 )
 
     
@@ -548,7 +570,7 @@ class TestAnalyser(unittest.TestCase):
             # Check if the name is in 'First Last (Employee Number)' format
             match = re.match(r'^([A-Za-z]+(?: [A-Za-z]+)*) \((\d{3})\)$', name)
             self.assertRegex(
-                name, match,
+                name, r'^([A-Za-z]+(?: [A-Za-z]+)*) \((\d{3})\)$',
                 f"Invalid name format: employee should be in 'First Last (Employee Number)' format."
             )
 
@@ -575,14 +597,18 @@ class TestAnalyser(unittest.TestCase):
         """
         Test the summary method with given parameters and expected output.
         """
-        summary_data = self.analyser.summary(f'{frequency}', pivot=True)
+        summary_data = self.analyser.summary(f'{frequency}')
+
         # Test if total hours worked is a number
-        self.is_valid_number(summary_data, f'{frequency}')
+        numeric_cols = ['Avg Hours Worked', 'Median Hours Worked', 'Min Hours Worked', 'Max Hours Worked', 'Number of Days Worked']
+        self.is_valid_number(summary_data, numeric_cols, f'{frequency}')
+
         # Test if date is in the correct format
         if frequency == 'monthly' or frequency == 'weekly':
             self.is_valid_date(summary_data[f'Year_{frequency}'], f'{frequency}')
         elif frequency == 'Weekday':
             self.is_valid_date(summary_data['Weekday'], f'{frequency}')
+
         # Test if employee name is in the correct format
         self.is_valid_name(summary_data['Employee'])
 
@@ -617,6 +643,12 @@ class TestAnalyser(unittest.TestCase):
             "productivity_rank column should be numeric"
         )
 
+        # Test if the productivity rank is in the range of 1 to 5
+        self.assertTrue(
+            all(1 <= rank <= 5 for rank in productivity['productivity_rank']),
+            "productivity_rank should be in the range of 1 to 5"
+        )
+
         # Test if employee name is in the correct format
         self.is_valid_name(productivity['Employee'])
 
@@ -625,32 +657,61 @@ class TestAnalyser(unittest.TestCase):
         """
         Test if overtime method result is valid.
         """
-        overtime_weekly = self.analyser.total_overtime_weekly()
-        overtime =  overtime_weekly.columns['Overtime']
-        # Test if overtime is a number
-        self.assertIsInstance(overtime, (int, float),
-                          f"Invalid type : {overtime} should be a number")
+        overtime_weekly = self.analyser.overtime('total')
+        numeric_cols = ['Overtime']
+        # Test if total overtime is a number
+        self.is_valid_number(overtime_weekly, numeric_cols, 'overtime_weekly') 
         # Test if employee name is in the correct format
         self.is_valid_name(overtime_weekly['Employee'])
         
-        total_overtime = self.analyser.total_overtime()
+        total_overtime = self.analyser.overtime('weekly')
         # Test if total overtime is a number
-        self.assertIsInstance(total_overtime, (int, float),
-                          f"Invalid type : {total_overtime} should be a number")
+        self.is_valid_number(total_overtime, numeric_cols, 'total_overtime')
         # Test if employee name is in the correct format
         self.is_valid_name(total_overtime['Employee'])
         # Test if the date is in the correct format
-        self.is_valid_date(total_overtime['Date_x'], 'weekly')
+        self.is_valid_date(total_overtime['Year_weekly'], 'weekly')
+
+    
+    def test_quarterly_performance(self):
+        """
+        Test if quarterly performance method result is valid.
+        """
+        quarterly_performance = self.analyser.quarterly_performance()
+        # Test if the date is in the correct format
+        numeric_cols = ['2024Q4', '2025Q1']
+        self.is_valid_number(quarterly_performance, numeric_cols, 'quarterly performance')
+        # Test if employee name is in the correct format
+        self.is_valid_name(quarterly_performance['Employee'])
+
+    
+    def test_weekend_compensation(self):
+        """
+        Test if weekend compensation method result is valid.
+        """
+        weekend_compensation = self.analyser.weekend_compensation()
+        # Test if the date is in the correct format
+        numeric_cols = ['Total_Weekday_Deficit', 'Total_Weekend_Hours', 'Compensated_Weeks_Ratio']
+        self.is_valid_number(weekend_compensation, numeric_cols, 'weekend compensation')
+        # Test if employee name is in the correct format
+        self.is_valid_name(weekend_compensation['Employee'])
+
+        # Reference valid mapping
+        valid_reviews = {
+            '5 - Exceeding Expectations',
+            '4 - Meeting Expectations',
+            '3 - Satisfactory'
+        }
+
+        # Test if performance review is in the valid mapping
+        for review in weekend_compensation['Performance Review']:
+            self.assertIn(
+                review,
+                valid_reviews,
+                f"Invalid Performance Review value found: {review}"
+            )
             
         
-        
-        
-        
-    
-        
-
-
-
 if __name__ == '__main__':
     # Define the file path and timeframe here
     file_worklogs = "employee_worklogs.csv"
@@ -664,7 +725,6 @@ if __name__ == '__main__':
 
     # # Question 1 and 7
     # analyser.summary(frequency='weekly')
-    # analyser.summary(frequency='monthly')
     # analyser.summary(frequency='weekday')
     # analyser.summary(frequency='total')
     #
@@ -672,16 +732,18 @@ if __name__ == '__main__':
     # analyser.summary(frequency='monthly')
     #
     # # Question 3 and 4
-    # analyser.total_overtime()
-    # analyser.total_overtime_weekly()
+    # analyser.overtime(frequency='weekly')
+    # analyser.overtime(frequency='total')
 
     # Question 5 and 6
     # analyser.productivity_analysis()
 
     # # additional features
-    # analyser.add_1()
-    # analyser.add_2()
+    # analyser.quarterly_performance()
+    # analyser.weekend_compensation()
+    # analyser.set_dates()  # if no parameter then reset to original (no filtering) -> no output, just filtering
+    # analyser.export_original_data()
  
     # test the analyser
-    # unittest.main(exit=False)
+    unittest.main(exit=False)
 
