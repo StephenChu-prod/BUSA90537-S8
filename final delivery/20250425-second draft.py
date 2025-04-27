@@ -221,7 +221,45 @@ class EmployeeAnalyser:
         self.data['Year_month'] = self.data['Date_x'].dt.strftime('%Y-%m')
 
     def summary(self, frequency: Literal['weekly', 'monthly', 'weekday', 'total'] = 'weekly', pivot: bool = False):
-        pass
+            """
+            Generate a summary based on the specified frequency and pivot option.
+
+            Parameters:
+            - frequency (Literal['weekly', 'monthly', 'weekday']): The time frequency for grouping data.
+                Options are 'weekly', 'monthly','weekday'. Default is 'weekly'.
+            - pivot (bool): Whether to pivot the resulting DataFrame. Default is False.
+            
+            Returns:
+            - Summary data grouped by the specified frequency.
+            """
+            if frequency == 'weekly':
+            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['mean', 'median', 'min', 'max']).reset_index()
+            # print(grouped.head())
+            # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
+            index_col = 'Year_week'
+            elif frequency == 'monthly':
+            grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
+            index_col = 'Year_month'
+            elif frequency == 'weekday':
+            grouped = self.data.groupby(['Weekday', 'Employee'])['Hours Worked'].sum().reset_index()
+            index_col = 'Weekday'
+            elif frequency == 'total':
+            grouped = self.data.groupby(['Employee'])['Hours Worked'].sum().reset_index()
+            index_col = 'Employee'
+            else:
+            raise ValueError("Invalid frequency. Choose 'weekly' or 'monthly'.")
+       
+            # output
+            grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
+            if pivot:
+                pivoted = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
+                pivoted.to_csv(f'pivoted_summary_{frequency}.csv')
+        
+            
+            
+
+
+
 
     # @staticmethod
     # def __get_overtime(hours):
@@ -273,11 +311,6 @@ class EmployeeAnalyser:
         grouped.columns = ['Year_week', 'Employee', 'Overtime']
         grouped['Overtime'] = grouped['Overtime'].round(2)
 
-        # Show the plot
-
-        # Export to CSV
-        grouped.to_csv('total_overtime_weekly.csv')
-
     def productivity_analysis(self):
         df = self.data.copy()
 
@@ -301,7 +334,19 @@ class EmployeeAnalyser:
         df.to_csv('productivity_analysis.csv', index=False)
 
     def add_1(self):
-        pass
+        data = self.data.copy()
+        # calculate quarterly median per employee
+        employee_quarterly = data.groupby(['Quarter', 'Employee'])['Hours Worked'].agg(['median']).reset_index()
+
+        # calculate overall then calculate the difference
+        overall_quarterly = data.groupby(['Quarter'])['Hours Worked'].agg(['median']).reset_index().rename(columns={'median': 'overall_median'})
+        quarterly_performance = pd.merge(employee_quarterly, overall_quarterly, how='left', on='Quarter')
+        quarterly_performance['diff'] = quarterly_performance['median'] - quarterly_performance['overall_median']
+
+        # pivot and export result
+        quarterly_pivot = quarterly_performance.pivot(index=['Employee'], columns='Quarter',values='diff').reset_index().round(2)
+        quarterly_pivot.to_csv('quarterly_performance.csv', index=False)
+
 
     def add_2(self):
         pass
