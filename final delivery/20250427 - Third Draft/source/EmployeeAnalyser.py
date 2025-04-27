@@ -109,7 +109,7 @@ class EmployeeAnalyser:
         grouped.columns = ['Avg Hours Worked', 'Median Hours Worked',
                            'Min Hours Worked', 'Max Hours Worked','Number of Days Worked']
         grouped = grouped.round(2).reset_index()
-        grouped.to_csv(f'grouped_summary_{frequency}.csv', index=False)
+        grouped.to_csv(f'summary_{frequency}.csv', index=False)
 
     @staticmethod
     def __get_overtime(hours):

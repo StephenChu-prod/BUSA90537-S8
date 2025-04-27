@@ -1,6 +1,5 @@
 from EmployeeAnalyser import EmployeeAnalyser
 
-
 if __name__ == '__main__':
     """
     Main function: Run the program here
@@ -36,4 +35,5 @@ if __name__ == '__main__':
     # additional features
     analyser.quarterly_performance()
     analyser.weekend_compensation()
-    analyser.set_dates()  # if no parameter then reset to original (no filtering)
+    analyser.set_dates()  # if no parameter then reset to original (no filtering) -> no output, just filtering
+    # analyser.export_original_data()
