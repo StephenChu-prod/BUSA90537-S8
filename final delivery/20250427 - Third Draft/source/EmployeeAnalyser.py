@@ -124,24 +124,28 @@ class EmployeeAnalyser:
         else:
             return 0
 
-    def total_overtime(self):
+    def overtime(self,frequency: Literal['weekly','total'] = 'total'):
         """
         Helper function that the calculates total overtime hours worked by employees
         Input: String
         Output: Integer
         """
+        if frequency == 'weekly':
+            index_col = ['Year_week', 'Employee']
+        else:
+            index_col = ['Employee']
         # Create a new column for overtime hours
         dataset = self.data.copy()
         dataset['Overtime'] = dataset['Hours Worked'] - 7.5
         dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
 
         # Group by employee and sum overtime hours
-        grouped = dataset.groupby(['Employee'])['Overtime'].sum().reset_index()
-        grouped.columns = ['Employee', 'Overtime']
-        grouped['Overtime'] = grouped['Overtime'].round(2)
+        grouped = dataset.groupby(index_col)['Overtime'].sum()
+        grouped.columns = ['Overtime']
+        grouped = grouped.round(2).reset_index()
 
         # Export to CSV
-        grouped.to_csv('total_overtime.csv')
+        grouped.to_csv(f'overtime_{frequency}.csv',index=False)
 
     def productivity_analysis(self):
         df = self.data.copy()

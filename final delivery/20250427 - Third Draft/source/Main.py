@@ -27,7 +27,8 @@ if __name__ == '__main__':
     analyser.summary(frequency='monthly')
 
     # Question 3 and 4
-    analyser.total_overtime()
+    analyser.overtime(frequency="weekly")
+    analyser.overtime(frequency="total")
 
     # Question 5 and 6
     analyser.productivity_analysis()
@@ -36,4 +37,4 @@ if __name__ == '__main__':
     analyser.quarterly_performance()
     analyser.weekend_compensation()
     analyser.set_dates()  # if no parameter then reset to original (no filtering) -> no output, just filtering
-    # analyser.export_original_data()
+    analyser.export_original_data()
