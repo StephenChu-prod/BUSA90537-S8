@@ -46,7 +46,7 @@ if __name__ == '__main__':
         title='Employee Overtime Hours',
         xlabel='Employee',
         ylabel='Total Overtime Hours',
-        save_path='overtime_bar_chart.png'
+        save_path='overtime_bar_chart'
     )
 
     # Plot productivity rank
@@ -57,6 +57,6 @@ if __name__ == '__main__':
         title='Employee Productivity Rank',
         xlabel='Employee',
         ylabel='Productivity Rank',
-        save_path='productivity_rank_bar_chart.png'
+        save_path='productivity_rank_bar_chart'
     )
 

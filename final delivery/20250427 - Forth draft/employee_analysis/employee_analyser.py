@@ -203,7 +203,7 @@ class EmployeeAnalyser:
 
         data_to_productivity = data_to_productivity[['Employee','productivity_score','productivity_rank']].round(2)
         # Save results
-        data_to_productivity.to_csv('productivity_analysis.csv', index=False)
+        data_to_productivity.to_csv('employee_report.csv', index=False)
 
         return data_to_productivity
     
