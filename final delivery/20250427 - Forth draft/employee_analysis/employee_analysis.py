@@ -11,8 +11,9 @@ if __name__ == '__main__':
     end_date = "10/02/2025"
 
     # Run the program here
-    analyser = EmployeeAnalyser(file_worklogs, file_performance_review, start_date=start_date, end_date=end_date)
-
+    analyser = EmployeeAnalyser(file_worklogs, file_performance_review,\
+                                 start_date=start_date, end_date=end_date)
+    analyser.summary(frequency='weekly')
 
     # Question 1 and 7
     analyser.summary(frequency='weekly')
@@ -30,8 +31,8 @@ if __name__ == '__main__':
     productivity = analyser.productivity_analysis()
 
     # additional features
-    analyser.quarterly_performance()
-    analyser.weekend_compensation()
+    quarterly_performance = analyser.quarterly_performance()
+    compensation = analyser.weekend_compensation()
     analyser.set_dates()  # if no parameter then reset to original (no filtering) -> no output, just filtering
     analyser.export_original_data()
  
@@ -58,5 +59,31 @@ if __name__ == '__main__':
         xlabel='Employee',
         ylabel='Productivity Rank',
         save_path='productivity_rank_bar_chart'
+    )
+
+
+    # Plot quarterly performance for 2024Q4
+    quarterly_performance.columns = quarterly_performance.columns.map(str)
+    Plotter.plot_bar(
+        data=quarterly_performance,
+        x_column='Employee',
+        y_column='2024Q4',
+        title='Individual Workhour Deviation from Team Average (2024Q4)',
+        xlabel='Employee',
+        ylabel='Hours',
+        save_path='2024Q4_workhour_deviation_bar_chart',
+        clr='green'
+    )
+
+    # Plot quarterly performance for 2025Q1
+    Plotter.plot_bar(
+        data=quarterly_performance,
+        x_column='Employee',
+        y_column='2025Q1',
+        title='Individual Workhour Deviation from Team Average (2025Q1)',
+        xlabel='Employee',
+        ylabel='Hours',
+        save_path='2025Q1_workhour_deviation_bar_chart',
+        clr='blue'
     )
 

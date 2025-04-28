@@ -18,7 +18,6 @@ class DataCleaner:
 
     def replace_number_words(self):
         """
-        Note: This is meant to be a private function that should not be called outside the object
         Helper function that converts words to numbers
         """
 

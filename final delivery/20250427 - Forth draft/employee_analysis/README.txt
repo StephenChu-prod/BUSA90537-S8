@@ -1,5 +1,6 @@
 ### Coding for Business Problems BUSA90537 Group 8
 ### Syndicate Assignment: employee_analysis
+# Note: It is recommended to rename this file extension from `.txt` to `.md` for better and clear readability.
 
 ### Introduction
 This project analyses employee worklog and performance data, summarizes working patterns, calculates overtime, employee productivity, two additional future which include quarterly performance and weekday weekend comparison, and generates insightful plots.

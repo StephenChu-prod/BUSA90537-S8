@@ -33,9 +33,8 @@ class Plotter:
         else:
             plt.show()
         
-
     @staticmethod
-    def plot_bar(data, x_column, y_column, title="Bar Chart", xlabel=None, ylabel=None, save_path=None):
+    def plot_bar(data, x_column, y_column, title="Bar Chart", xlabel=None, ylabel=None, save_path=None, clr='skyblue'):
         """
         Draw a bar chart.
         
@@ -46,14 +45,17 @@ class Plotter:
         - title: title of the bar chart
         - xlabel: label for x-axis
         - ylabel: label for y-axis
+        - color: color of the bars (default is 'skyblue')
         """
         plt.figure(figsize=(10, 6))
-        plt.bar(data[x_column], data[y_column], color='skyblue', width=0.5)
+        plt.bar(data[x_column], data[y_column], color=clr, width=0.5)
+        plt.axhline(0, color='black', linewidth=1)
         plt.title(title)
         plt.xlabel(xlabel if xlabel else x_column)
         plt.ylabel(ylabel if ylabel else y_column)
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
+        
         if save_path:
             path = f"{save_path}.png"
             plt.savefig(path)
@@ -90,3 +92,45 @@ class Plotter:
             plt.close()
         else:
             plt.show()
+
+
+    @staticmethod
+    def plot_stacked_bar(data, x_column, y_columns, title="Stacked Bar Chart", xlabel=None, ylabel=None, colors=None, save_path=None):
+        """
+        Draw a stacked bar chart.
+
+        Parameters:
+        - data: pandas DataFrame
+        - x_column: column name for x-axis
+        - y_columns: list of column names to stack on y-axis
+        - title: title of the bar chart
+        - xlabel: label for x-axis
+        - ylabel: label for y-axis
+        - colors: list of two colors
+        - save_path: if given, save the plot
+        """
+        # Make sure columns are strings
+        data.columns = data.columns.map(str)
+
+        # Set the x-axis
+        ax = data.set_index(x_column)[y_columns].plot(
+            kind='bar',
+            stacked=True,
+            figsize=(12, 6),
+            color=colors if colors else ['skyblue', 'salmon']
+        )
+
+        ax.legend(y_columns, loc='upper left')
+        plt.title(title)
+        plt.ylabel(ylabel if ylabel else 'Value')
+        plt.xlabel(xlabel if xlabel else 'Category')
+        plt.axhline(0, color='black', linewidth=0.8)  # Draw horizontal line at y=0
+        plt.xticks(rotation=90, fontsize=7)
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(f"{save_path}.png")
+            print(f"Plot saved to {save_path}.png")
+            plt.close()
+        else:
+            plt.show()  

@@ -35,8 +35,8 @@ class EmployeeAnalyser:
         """
         Set the start and end dates for filtering the data.
         Parameters:
-        - start (str): Start date in 'dd/mm/yyyy' format.
-        - end (str): End date in 'dd/mm/yyyy' format.
+        - start (str): Start date in 'dd/mm/yyyy' format. If None, no filtering is applied.
+        - end (str): End date in 'dd/mm/yyyy' format. If None, no filtering is applied.
         """
         self._start_date = self.__parse_date(start)
         self._end_date = self.__parse_date(end)
@@ -248,7 +248,7 @@ class EmployeeAnalyser:
 
         # Find out the daily deficit for weekday
         data_add2["Weekday_Deficit"] = data_add2.apply(
-            lambda row: max(0, 7.5 - row["Hours Worked"]) if not row["IsWeekend"] else 0,
+            lambda row: 7.5 - row["Hours Worked"] if not row["IsWeekend"] else 0,
             axis=1
         )
 
