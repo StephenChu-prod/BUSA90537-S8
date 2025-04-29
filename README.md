@@ -121,6 +121,8 @@ There are three parts you can edit to run the main script as follows:
 | 7   | summary_total                | Basic       | For Q6, the total amount of hours worked |
 | 8   | summary_weekly               | Basic       | For Q1 and 7, calculating the weekly average hours worked as well as the weekly summary for the employee |
 | 9   | weekday weekday comparison   | Additional  | Additional Feature 2, calculating the weekly deficit in hours worked and compare with weekend work hours |
+| 10  | employee_weekly_deficit_vs_compensation.png | Additional | Visualization of weekday vs weekend work patterns       |
+| 11  | individual_workhour_deviation.png        | Additional | Visualization of quarterly workhour deviation 
 
 
 # Reference list
