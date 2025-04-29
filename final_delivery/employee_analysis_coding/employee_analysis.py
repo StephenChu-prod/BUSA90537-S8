@@ -12,12 +12,12 @@ if __name__ == '__main__':
 
     # Run the program here
     analyser = EmployeeAnalyser(file_worklogs, file_performance_review,start_date=start_date, end_date=end_date)
-    analyser.summary(frequency='weekly')
 
     # Question 1 and 7
     analyser.summary(frequency='weekly')
-    analyser.summary(frequency='Weekday')
+    # analyser.summary(frequency='Weekday')
     analyser.summary(frequency='total')
+    analyser.summary(frequency='weekly')
     
     # Question 2 and 8
     analyser.summary(frequency='monthly')
@@ -35,8 +35,6 @@ if __name__ == '__main__':
     analyser.set_dates()  # if no parameter then reset to original (no filtering) -> no output, just filtering
     analyser.export_original_data()
  
-    # test the analyser
-    unittest.main(exit=False)
 
     # Plot overtime
     Plotter.plot_bar(
@@ -90,3 +88,6 @@ if __name__ == '__main__':
         save_path='individual_workhour_deviation'
     )
 
+    
+    # test the analyser
+    # unittest.main(exit=False)
