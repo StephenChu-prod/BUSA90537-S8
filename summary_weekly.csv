@@ -1,0 +1,15 @@
+Year_weekly,Employee,Avg Hours Worked,Median Hours Worked,Min Hours Worked,Max Hours Worked,Number of Days Worked
+2024-W45,Bob Smith (102),3.62,3.62,3.62,3.62,1
+2024-W45,Charlie Brown (103),9.81,9.81,9.81,9.81,1
+2024-W46,Alice Johnson (101),7.32,7.32,7.32,7.32,1
+2024-W47,Bob Smith (102),5.8,5.8,5.04,6.55,2
+2024-W48,Emma Davis (105),9.35,9.35,9.35,9.35,1
+2024-W50,David Wilson (104),4.58,4.58,3.19,5.96,2
+2024-W51,Charlie Brown (103),5.01,5.01,2.23,7.8,2
+2024-W51,David Wilson (104),6.46,7.07,5.0,7.31,3
+2024-W51,Emma Davis (105),6.96,6.96,5.2,8.72,2
+2024-W52,David Wilson (104),5.81,5.81,5.81,5.81,1
+2024-W52,Emma Davis (105),6.8,6.8,6.8,6.8,1
+2025-W01,David Wilson (104),2.05,2.05,2.05,2.05,1
+2025-W04,Bob Smith (102),2.55,2.55,2.55,2.55,1
+2025-W05,Alice Johnson (101),5.98,5.98,5.98,5.98,1

@@ -18,13 +18,11 @@ from word2number import w2n
 import csv
 import unittest
 from typing import Literal
-import matplotlib.pyplot as plt
 
 
 class DataSet(ABC):
     """
-    The abstract class that define the function that will be used in the child class.
-    DataSet is the base class for all datasets which will be read to analyze.
+    The abstract class that define the function that will be used in the child class
     """
 
     def __init__(self, source, start_date=None, end_date=None):
@@ -48,6 +46,7 @@ class DataSet(ABC):
         if not date_str:
             return None
         try:
+            # Reference: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.to_datetime.html
             return pd.to_datetime(date_str, dayfirst=True)
         except ValueError:
             raise ValueError(f"Invalid date format: {date_str}")
@@ -72,12 +71,14 @@ class DataSet(ABC):
             # Read the records into a list
             records = list(reader)
             # Create a DataFrame from the records
+            # Reference: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.copy.html
             data = pd.DataFrame(records[1:], columns=records[0])
         return data
 
     def __add__(self, other):
         """Merge two datasets on Employee Number."""
         if isinstance(other, DataSet):
+            # Reference: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge.html
             return pd.merge(
                 self.get_dataset(),
                 other.get_dataset(),
@@ -93,10 +94,6 @@ class DataSet(ABC):
 
 
 class Worklogs(DataSet):
-    """
-    The class that handles the worklogs dataset.
-    It inherits from the DataSet class and implements the clean_data method.
-    """
     def __init__(self, file, start_date=None, end_date=None):
         """The constructor of Worklogs class"""
         super().__init__(file, start_date, end_date)
@@ -110,9 +107,8 @@ class Worklogs(DataSet):
         part 3: Filter the data by date range
         Part 4: Check the employee name and employee number
         """
-        # 1. Identify and replace invalid numbers in Hours Worked
-        self.__replace_number_words()
 
+        self.__replace_number_words()
         # 2. Identify and replace invalid value in Date Column
         self._data["Date"] = pd.to_datetime(self._data["Date"], format="mixed", errors="coerce")
 
@@ -127,6 +123,7 @@ class Worklogs(DataSet):
         Note: This is meant to be a private function that should not be called outside the object
         Helper function that converts numbers to words
         """
+
         def word_to_number(text):
             # try parse the word to number and convert to lowercase to handle case-insensitivity
             try:
@@ -176,9 +173,6 @@ class Worklogs(DataSet):
 
 
 class PerformanceReview(DataSet):
-    """
-    The class that handles the performance review dataset.
-    """
     def __init__(self, file):
         super().__init__(file)
 
@@ -201,124 +195,12 @@ class EmployeeAnalyser:
         # Merge datasets
         self.data = self.worklogs + self.reviews
         self.additional_columns()
-        self.total_hours('all')
-
+        self.out_data = self.data.copy()
 
     def output(self):
-        """
-        Output the data to CSV
-        """
-        self.data.to_csv('analyser.csv', index=False)
-
-
-    def total_hours(self, frequency: Literal['weekly', 'monthly', 'all']):
-        """
-        Helper function that calculates total hours worked by employees
-        Input: String
-        Output: DataFrame
-        """
-        # Group by employee and frequency, sum hours worked
-        if frequency == 'weekly':
-            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].sum().reset_index()
-            grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
-            index_col = 'Year_week'
-        elif frequency == 'monthly':
-            grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
-            grouped.columns = ['Year_month', 'Employee', 'Hours Worked']
-            index_col = 'Year_month'
-        elif frequency == 'all':
-            grouped = self.data.groupby(['Employee'])['Hours Worked'].sum().reset_index()
-            grouped.columns = ['Employee', 'Hours Worked']
-            index_col = 'Employee'
-        else:
-            raise ValueError("Invalid frequency. Choose 'weekly' or 'monthly'.")
-
-        # Round hours to 2 decimal place
-        grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
-
-        # Pivot the data for plotting
-        if frequency == 'all':
-            # Export to CSV
-            grouped.to_csv('total_hours_all.csv')
-        else:
-            pivoted_data = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
-            # Show the plot
-            plt.figure(figsize=(12, 6))
-            for col in pivoted_data.columns:
-                plt.plot(pivoted_data.index, pivoted_data[col], marker='o', label=col)
-
-            plt.title(f'Employee {frequency.capitalize()} Hours Worked')
-            plt.xlabel(index_col.replace('_', ' ').capitalize())
-            plt.ylabel('Hours Worked')
-            plt.xticks(rotation=45)
-            plt.grid(True)
-            plt.legend(title='Employee', bbox_to_anchor=(1.05, 1), loc='upper left')
-            plt.tight_layout()
-            plt.show()
-  
-            # Export to CSV
-            pivoted_data.to_csv(f'total_hours_{frequency}.csv')
-
-
-    def total_overtime(self):
-        """
-        Helper function that the calculates total overtime hours worked by employees
-        Input: String
-        Output: Integer
-        """
-        # Create a new column for overtime hours
-        dataset = self.data.copy()
-        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
-        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
-
-        # Group by employee and sum overtime hours
-        grouped = dataset.groupby(['Employee'])['Overtime'].sum().reset_index()
-        grouped.columns = ['Employee', 'Overtime']
-        grouped['Overtime'] = grouped['Overtime'].round(2)
-
-        # Show the plot
-        
-        # Export to CSV
-        grouped.to_csv('total_overtime.csv')
-
-
-    def total_overtime_weekly(self):
-        """
-        Helper function that the calculates total overtime hours worked by employees
-        Input: String
-        Output: Integer
-        """
-        # Create a new column for overtime hours
-        dataset = self.data.copy()
-        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
-        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
-
-        # Group by employee and sum overtime hours
-        grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
-        grouped.columns = ['Year_week', 'Employee', 'Overtime']
-        grouped['Overtime'] = grouped['Overtime'].round(2)
-
-        # Show the plot
-
-        # Export to CSV
-        grouped.to_csv('total_overtime_weekly.csv')
-
-    
-    def productive_employee(self):
-        """
-        Most productive employee is determined by 3 metrics (from most priority to least):
-        (1) Performance Review result (5: most productive, 1: least productive)
-        (2) Median of work hours (lower median : higher productivity)
-        (3) Count of workday (higher count of workday : higher productivity)
-        """
-        # Group by employee and performance review, calculate median and count
-        grouped = self.data.groupby(['Employee Number', 'Performance Review'])['Hours Worked'].agg(['median', 'count']).reset_index()
-        grouped.sort_values(by=['Performance Review', 'median', 'count'], ascending=[False, True, False]).reset_index(drop=True)
-        grouped['productivity_rank'] = grouped.index + 1
-
-        # Export to CSV
-        grouped.to_csv('productive_employee.csv', index=False)
-
+        if not self.out_data:
+            print('there is no output')
+        self.out_data.to_csv('analyser.csv', index=False)
 
     def additional_columns(self):
         """
@@ -338,31 +220,171 @@ class EmployeeAnalyser:
             'Week'].astype(str).str.zfill(2)
         self.data['Year_month'] = self.data['Date_x'].dt.strftime('%Y-%m')
 
-        # Export the data to CSV
-        self.data.to_csv('output_CleanData.csv', index=False)
+    def summary(self, frequency: Literal['weekly', 'monthly', 'weekday', 'total'] = 'weekly', pivot: bool = False):
+            """
+            Generate a summary based on the specified frequency and pivot option.
 
-    def summary(self, frequency: Literal['weekly', 'monthly', 'weekday'], pivot: bool = False):
-        if frequency == 'weekly':
-            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].sum().reset_index()
+            Parameters:
+            - frequency (Literal['weekly', 'monthly', 'weekday']): The time frequency for grouping data.
+                Options are 'weekly', 'monthly','weekday'. Default is 'weekly'.
+            - pivot (bool): Whether to pivot the resulting DataFrame. Default is False.
+            
+            Returns:
+            - Summary data grouped by the specified frequency.
+            """
+            if frequency == 'weekly':
+            grouped = self.data.groupby(['Year_week', 'Employee'])['Hours Worked'].agg(['mean', 'median', 'min', 'max']).reset_index()
             # print(grouped.head())
-            grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
+            # grouped.columns = ['Year_week', 'Employee', 'Hours Worked']
             index_col = 'Year_week'
-        elif frequency == 'monthly':
+            elif frequency == 'monthly':
             grouped = self.data.groupby(['Year_month', 'Employee'])['Hours Worked'].sum().reset_index()
             index_col = 'Year_month'
-        elif frequency == 'weekday':
+            elif frequency == 'weekday':
             grouped = self.data.groupby(['Weekday', 'Employee'])['Hours Worked'].sum().reset_index()
             index_col = 'Weekday'
-        else:
+            elif frequency == 'total':
+            grouped = self.data.groupby(['Employee'])['Hours Worked'].sum().reset_index()
+            index_col = 'Employee'
+            else:
             raise ValueError("Invalid frequency. Choose 'weekly' or 'monthly'.")
+       
+            # output
+            grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
+            if pivot:
+                pivoted = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
+                pivoted.to_csv(f'pivoted_summary_{frequency}.csv')
+        
+            
+            
 
-        # output
-        grouped['Hours Worked'] = grouped['Hours Worked'].round(2)
-        if pivot:
-            pivoted = grouped.pivot(index=index_col, columns='Employee', values='Hours Worked')
-            pivoted.to_csv(f'pivoted_summary_{frequency}.csv')
-        else:
-            grouped.to_csv(f'grouped_summary_{frequency}.csv', index=False)
+
+
+
+    # @staticmethod
+    # def __get_overtime(hours):
+    #     """
+    #     Helper function that converts words to numbers and filters numbers
+    #     Input: String
+    #     Output: Integer
+    #     """
+    #     hours = float(hours)
+    #     if hours > 7.5:
+    #         return hours - 7.5
+    #     else:
+    #         return 0
+
+    def total_overtime(self):
+        """
+        Helper function that the calculates total overtime hours worked by employees
+        Input: String
+        Output: Integer
+        """
+        # Create a new column for overtime hours
+        dataset = self.data.copy()
+        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
+        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
+
+        # Group by employee and sum overtime hours
+        grouped = dataset.groupby(['Employee'])['Overtime'].sum().reset_index()
+        grouped.columns = ['Employee', 'Overtime']
+        grouped['Overtime'] = grouped['Overtime'].round(2)
+
+        # Show the plot
+
+        # Export to CSV
+        grouped.to_csv('total_overtime.csv')
+
+    def total_overtime_weekly(self):
+        """
+        Helper function that the calculates total overtime hours worked by employees
+        Input: String
+        Output: Integer
+        """
+        # Create a new column for overtime hours
+        dataset = self.data.copy()
+        dataset['Overtime'] = dataset['Hours Worked'] - 7.5
+        dataset['Overtime'] = dataset['Overtime'].apply(lambda x: x if x > 0 else 0)
+
+        # Group by employee and sum overtime hours
+        grouped = dataset.groupby(['Year_week', 'Employee'])['Overtime'].sum().reset_index()
+        grouped.columns = ['Year_week', 'Employee', 'Overtime']
+        grouped['Overtime'] = grouped['Overtime'].round(2)
+
+    def productivity_analysis(self):
+        df = self.data.copy()
+
+        # Extract performance score from reviews
+        df['Performance Score'] = df['Performance Review'].str.extract(r'(\d)').astype(int)
+
+        # Group by employee and performance score, calculate median hours and entry count
+        df = df.groupby(['Employee', 'Performance Score'])['Hours Worked'].agg(
+            ['median', 'count']).reset_index()
+
+        # Sort by performance (desc), median hours (asc), count (desc) and reset index
+        df = df.sort_values(
+            by=['Performance Score', 'median', 'count'],
+            ascending=[False, True, False]
+        ).reset_index(drop=True)
+
+        # Assign rank based on sorted order
+        df['productivity_rank'] = df.index + 1
+
+        # Save results
+        df.to_csv('productivity_analysis.csv', index=False)
+
+    def add_1(self):
+        data = self.data.copy()
+        # calculate quarterly median per employee
+        employee_quarterly = data.groupby(['Quarter', 'Employee'])['Hours Worked'].agg(['median']).reset_index()
+
+        # calculate overall then calculate the difference
+        overall_quarterly = data.groupby(['Quarter'])['Hours Worked'].agg(['median']).reset_index().rename(columns={'median': 'overall_median'})
+        quarterly_performance = pd.merge(employee_quarterly, overall_quarterly, how='left', on='Quarter')
+        quarterly_performance['diff'] = quarterly_performance['median'] - quarterly_performance['overall_median']
+
+        # pivot and export result
+        quarterly_pivot = quarterly_performance.pivot(index=['Employee'], columns='Quarter',values='diff').reset_index().round(2)
+        quarterly_pivot.to_csv('quarterly_performance.csv', index=False)
+
+
+    def add_2(self):
+        pass
+
+
+
+class TestAnalyser(unittest.TestCase):
+    """
+    Test class for EmployeeAnalyser
+    """
+
+    def setUp(self):
+        """
+        Set up the test environment.
+        Create a EmployeeAnalyser instance with test data.
+        """
+
+        file_worklogs = "employee_worklogs.csv"
+        file_performance_review = "employee_performance_review.csv"
+        start_date = "04/11/2024"
+        end_date = "10/02/2025"
+
+        self.analyser = EmployeeAnalyser(file_worklogs, file_performance_review, start_date=start_date,
+                                         end_date=end_date)
+
+
+    def do_test(self, input, expected):
+        """
+        Test the EmployeeAnalyser class with given parameters and expected output.
+        """
+        self.assertEqual(expected, input)
+
+    def test_summary(self):
+        """
+        Test the summary method of EmployeeAnalyser class.
+        """
+        pass
+        
 
 
 
@@ -375,3 +397,18 @@ if __name__ == '__main__':
 
     # Run the program here
     analyser = EmployeeAnalyser(file_worklogs, file_performance_review, start_date=start_date, end_date=end_date)
+
+    # Question 1 and 7
+    # analyser.summary(frequency='weekly')
+
+    # Question 2 and 8
+    # analyser.summary(frequency='monthly', pivot=True)
+
+    # Question 3 and 4
+    # analyser.overtime()
+
+    # Question 5 and 6
+    # analyser.productivity_analysis()
+
+    # additional features
+    # analyser.add_2()

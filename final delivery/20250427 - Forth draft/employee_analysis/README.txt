@@ -22,9 +22,6 @@ note: Ensure you have the following input files:
 ```bash
     pip install pandas matplotlib word2number numpy
 ```
-and make sure you have following csv file under the current path:
-1) employee_worklogs.csv
-2) employee_performance_review.csv
 
 ## 2. Run the main script(analyser, plot):
 ```bash
@@ -88,21 +85,15 @@ There are three parts you can edit to run the main script as follows:
         unittest.main(exit=False)
     ```
     or
-    Uncomment this code in the end of employee_analysis.py file:
-    ```python
-        # test the analyser
-        # unittest.main(exit=False)
-    ```
-    or
     ```bash
         python -m unittest test.py
     ```
     You also can follow this step to change the data for test:
-            # Create a test dataset
-            file_worklogs = "test_employee_worklogs.csv"
-            file_performance_review = "test_employee_performance_review.csv"
-        and change the file_path of file_worklogs and file_performance_review
-
+        Uncomment these code in setup method in the TestAnalyser class:
+            # # Create a test dataset
+            # file_worklogs = "test_employee_worklogs.csv"
+            # file_performance_review = "test_employee_performance_review.csv"
+        or change the conatin of file_worklogs and file_performance_review
 
 # **Key Features**:
   - Work summary reports (weekly, monthly, weekday, total), for the question 1, 2, 6, 7, 8
@@ -144,4 +135,3 @@ There are three parts you can edit to run the main script as follows:
 
 
 ## Now you are ready to run the analysis and visualize the results with just a few lines of code!!!
-
