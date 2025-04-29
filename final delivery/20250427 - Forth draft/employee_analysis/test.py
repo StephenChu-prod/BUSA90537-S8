@@ -13,7 +13,7 @@ class TestAnalyser(unittest.TestCase):
     """
     Test class for EmployeeAnalyser
     """
-
+    
     def setUp(self):
         """
         Set up the test environment.
@@ -24,6 +24,10 @@ class TestAnalyser(unittest.TestCase):
         file_performance_review = "employee_performance_review.csv"
         start_date = "04/11/2024"
         end_date = "10/02/2025"
+
+        # # Create a test dataset
+        # file_worklogs = "test_employee_worklogs.csv"
+        # file_performance_review = "test_employee_performance_review.csv"
 
         self.analyser = EmployeeAnalyser(file_worklogs, file_performance_review, start_date=start_date,
                                          end_date=end_date)
@@ -259,3 +263,5 @@ class TestAnalyser(unittest.TestCase):
                 valid_reviews,
                 f"Invalid Performance Review value found: {review}"
             )
+
+# unittest.main(exit=False)

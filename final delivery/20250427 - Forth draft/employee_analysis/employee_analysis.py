@@ -11,8 +11,7 @@ if __name__ == '__main__':
     end_date = "10/02/2025"
 
     # Run the program here
-    analyser = EmployeeAnalyser(file_worklogs, file_performance_review,\
-                                 start_date=start_date, end_date=end_date)
+    analyser = EmployeeAnalyser(file_worklogs, file_performance_review,start_date=start_date, end_date=end_date)
     analyser.summary(frequency='weekly')
 
     # Question 1 and 7
@@ -61,29 +60,33 @@ if __name__ == '__main__':
         save_path='productivity_rank_bar_chart'
     )
 
+    # Before plotting, adjust the data
+    compensation_plot = compensation.copy()
+    compensation_plot['Total_Weekday_Deficit'] *= -1
 
-    # Plot quarterly performance for 2024Q4
-    quarterly_performance.columns = quarterly_performance.columns.map(str)
-    Plotter.plot_bar(
-        data=quarterly_performance,
-        x_column='Employee',
-        y_column='2024Q4',
-        title='Individual Workhour Deviation from Team Average (2024Q4)',
-        xlabel='Employee',
+    # Now call your Plotter
+    Plotter.plot_stacked_bar(
+        data=compensation_plot,
+        x_column='Employee',  
+        y_columns=['Total_Weekday_Deficit', 'Total_Weekend_Hours'],  
+        title='Employee Weekly Workhour Deficit vs Weekend Compensation',
+        xlabel='Employee and Week',  
         ylabel='Hours',
-        save_path='2024Q4_workhour_deviation_bar_chart',
-        clr='green'
+        save_path='employee_weekly_deficit_vs_compensation'
     )
 
-    # Plot quarterly performance for 2025Q1
-    Plotter.plot_bar(
-        data=quarterly_performance,
+    # Create a new dataframe for plotting
+    deviation_plot = quarterly_performance.copy()
+
+    # Now call your new Plotter method
+    Plotter.plot_grouped_bar(
+        data=deviation_plot,
         x_column='Employee',
-        y_column='2025Q1',
-        title='Individual Workhour Deviation from Team Average (2025Q1)',
+        y_columns=['2024Q4', '2025Q1'],
+        title='Individual Workhour Deviation from Team Average (Q4 vs Q1)',
         xlabel='Employee',
-        ylabel='Hours',
-        save_path='2025Q1_workhour_deviation_bar_chart',
-        clr='blue'
+        ylabel='Deviation from Team Median (hours)',
+        colors=['#5DADE2', '#E74C3C'],
+        save_path='individual_workhour_deviation'
     )
 

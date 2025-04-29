@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt # Reference: https://matplotlib.org/stable/gallery/index.html
 import pandas as pd
+import numpy as np 
 
 class Plotter:
     """
@@ -134,3 +135,45 @@ class Plotter:
             plt.close()
         else:
             plt.show()  
+
+    @staticmethod
+    def plot_grouped_bar(data, x_column, y_columns, title="Grouped Bar Chart", xlabel=None, ylabel=None, colors=None, save_path=None):
+        """
+        Draw a grouped (side-by-side) bar chart.
+   
+        Parameters:
+        - data: pandas DataFrame
+        - x_column: column name for x-axis
+        - y_columns: list of two column names to compare
+        - title: title of the bar chart
+        - xlabel: label for x-axis
+        - ylabel: label for y-axis
+        - colors: list of colors for the bars
+        - save_path: if given, save the plot
+        """
+
+
+        data.columns = data.columns.map(str)
+        x = np.arange(len(data[x_column]))
+        width = 0.35
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+        bars1 = ax.bar(x - width/2, data[y_columns[0]], width, label=y_columns[0], color=colors[0] if colors else 'skyblue')
+        bars2 = ax.bar(x + width/2, data[y_columns[1]], width, label=y_columns[1], color=colors[1] if colors else 'salmon')
+
+        ax.set_ylabel(ylabel if ylabel else 'Value')
+        ax.set_xlabel(xlabel if xlabel else x_column)
+        ax.set_title(title)
+        ax.set_xticks(x)
+        ax.set_xticklabels(data[x_column], rotation=45, ha='right')
+        ax.axhline(0, color='black', linewidth=0.8)
+        ax.legend()
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(f"{save_path}.png")
+            print(f"Plot saved to {save_path}.png")
+            plt.close()
+        else:
+            plt.show()
