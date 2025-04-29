@@ -6,7 +6,7 @@ from typing import Literal # Reference: https://docs.python.org/3/library/typing
 import re # Reference: https://docs.python.org/3/library/re.html#re.match
 import numpy as np # Reference: https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray
 from dataset import *
-from employee_analyser import *
+from employee_analysis import *
 
 
 class TestAnalyser(unittest.TestCase):

@@ -6,10 +6,10 @@
 This project analyses employee worklog and performance data, summarizes working patterns, calculates overtime, employee productivity, two additional future which include quarterly performance and weekday weekend comparison, and generates insightful plots.
 
 # File Structure
-- `employee_analysis.py`: Main executable python script (also called main.py) to run analysis, generate outputs, test, and plot.
+- `main.py`: Main executable python script to run analysis, generate outputs, test, and plot.
 - `dataset.py`: Abstract class DataSet for loading and representing datasets, and include subclass wWorklogs and PerformanceReview.
 - `clean_data.py`: Helper class for cleaning and preprocessing datasets.
-- `employee_analyser.py`: Main class to load, clean, merge, and analyze employee data.
+- `employee_analysis.py`: Main class to load, clean, merge, and analyze employee data.
 - `test.py`: Test case class inherits Unittests for validating the analysis functionality and result.
 - `plot_graph.py`: Provides plotting utilities (bar chart, pie chart, line chart).
 - `README.md`: Project documentation.
@@ -28,7 +28,7 @@ and make sure you have following csv file under the current path:
 
 ## 2. Run the main script(analyser, plot):
 ```bash
-    python employee_analysis.py 
+    python main.py 
 ```
 note: Now you have already can run the program. However, if you need, you can edit the code follow the below steps
 There are three parts you can edit to run the main script as follows:
@@ -86,12 +86,6 @@ There are three parts you can edit to run the main script as follows:
     ```python
         import unittest
         unittest.main(exit=False)
-    ```
-    or
-    Uncomment this code in the end of employee_analysis.py file:
-    ```python
-        # test the analyser
-        # unittest.main(exit=False)
     ```
     or
     ```bash
