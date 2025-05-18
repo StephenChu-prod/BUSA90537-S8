@@ -126,8 +126,8 @@ class EmployeeAnalyser:
         
         # Reference: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
         grouped = group_data.groupby(index_col)['Hours Worked'].agg(
-            ['mean', 'median', 'min', 'max', 'count'])
-        grouped.columns = ['Avg Hours Worked', 'Median Hours Worked',
+            ['sum','mean', 'median', 'min', 'max', 'count'])
+        grouped.columns = ['Total Hours Worked','Avg Hours Worked', 'Median Hours Worked',
                            'Min Hours Worked', 'Max Hours Worked','Number of Days Worked']
         grouped = grouped.round(2).reset_index()
         grouped.to_csv(f'summary_{frequency}.csv', index=False)
