@@ -1,0 +1,6 @@
+Employee,Total Hours Worked,Avg Hours Worked,Median Hours Worked,Min Hours Worked,Max Hours Worked,Number of Days Worked
+Alice Johnson (101),534.0,7.12,7.0,4.0,10.0,75
+Bob Smith (102),554.4,7.29,7.45,4.2,9.9,76
+Charlie Brown (103),536.0,7.05,7.1,4.0,10.0,76
+David Wilson (104),575.7,7.29,7.4,4.2,9.9,79
+Emma Davis (105),537.8,6.81,6.6,4.0,10.0,79
